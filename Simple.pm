@@ -18,19 +18,15 @@ sub new {
 	# Create object.
 	my $self = bless {}, $class;
 
-	# Entity.
-	$self->{'entity'} = undef;
-
 	# Claims.
 	$self->{'claims'} = [];
 
+	# Entity.
+	$self->{'entity'} = undef;
+
+
 	# Process parameters.
 	set_params($self, @params);
-
-	# Check entity.
-	if (defined $self->{'entity'} && $self->{'entity'} !~ m/^Q\d+$/ms) {
-		err "Parameter 'entity' must contain string with Q on begin and numbers.";
-	}
 
 	# Check claims.
 	if (ref $self->{'claims'} ne 'ARRAY') {
@@ -41,6 +37,11 @@ sub new {
 			err "Parameter 'claims' must contain 'Wikidata::Datatype::Statement' ".
 				'objects only.';
 		}
+	}
+
+	# Check entity.
+	if (defined $self->{'entity'} && $self->{'entity'} !~ m/^Q\d+$/ms) {
+		err "Parameter 'entity' must contain string with Q on begin and numbers.";
 	}
 
 	return $self;
