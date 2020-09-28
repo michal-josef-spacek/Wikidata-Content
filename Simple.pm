@@ -103,10 +103,12 @@ sub parse {
 sub serialize {
 	my $self = shift;
 
-	my $struct_hr;
+	my $struct_hr = {};
 
 	# Title
-	$struct_hr->{'title'} = $self->{'entity'};
+	if (defined $self->{'entity'}) {
+		$struct_hr->{'title'} = $self->{'entity'};
+	}
 
 	# Descriptions.
 	# TODO
