@@ -80,18 +80,9 @@ sub add_claim_item {
 
 	my $property = $self->_get_property($claim_hr);
 
-	# TODO To common code.
-	if (ref $claim_hr->{$property} eq 'ARRAY') {
-		foreach my $claim_value (@{$claim_hr->{$property}}) {
-			push @{$self->{'claims'}}, $self->_add_claim_item($claim_hr,
-				$property, $claim_value);
-		}
-	} elsif (ref $claim_hr->{$property} eq '') {
-		push @{$self->{'claims'}}, $self->_add_claim_item($claim_hr,
-			$property, $claim_hr->{$property});
-	} else {
-		err "Unsupported reference for claim value.";
-	}
+	push @{$self->{'claims'}},
+		map { $self->_add_claim_item($claim_hr, $property, $_) }
+		$self->_process_values($claim_hr->{$property});
 
 	return;
 }
@@ -101,18 +92,9 @@ sub add_claim_string {
 
 	my $property = $self->_get_property($claim_hr);
 
-	# TODO To common code.
-	if (ref $claim_hr->{$property} eq 'ARRAY') {
-		foreach my $claim_value (@{$claim_hr->{$property}}) {
-			push @{$self->{'claims'}}, $self->_add_claim_string($claim_hr,
-				$property, $claim_value);
-		}
-	} elsif (ref $claim_hr->{$property} eq '') {
-		push @{$self->{'claims'}}, $self->_add_claim_string($claim_hr,
-			$property, $claim_hr->{$property});
-	} else {
-		err "Unsupported reference for claim value.";
-	}
+	push @{$self->{'claims'}},
+		map { $self->_add_claim_string($claim_hr, $property, $_) }
+		$self->_process_values($claim_hr->{$property});
 
 	return;
 }
@@ -274,6 +256,18 @@ sub _get_property {
 	}
 
 	return $p[0];
+}
+
+sub _process_values {
+	my ($self, $value) = @_;
+
+	if (ref $value eq 'ARRAY') {
+		return @{$value};
+	} elsif (ref $value eq '') {
+		return $value;
+	} else {
+		err "Unsupported reference for claim value.";
+	}
 }
 
 1;
