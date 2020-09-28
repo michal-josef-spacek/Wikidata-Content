@@ -66,7 +66,7 @@ sub add_claim_item {
 		# TODO Add references
 	);
 
-	return
+	return;
 }
 
 sub parse {
