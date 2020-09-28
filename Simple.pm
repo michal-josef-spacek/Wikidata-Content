@@ -52,20 +52,18 @@ sub add_claim_item {
 
 	my $property = $self->_get_property($claim_hr);
 
-	push @{$self->{'claims'}}, Wikidata::Datatype::Statement->new(
-		'entity' => $self->{'entity'},
-		$claim_hr->{'rank'} ? (
-			'rank' => $claim_hr->{'rank'},
-		) : (),
-		'snak' => Wikidata::Datatype::Snak->new(
-			'datatype' => 'wikibase-item',
-			'datavalue' => Wikidata::Datatype::Value::Item->new(
-				'value' => $claim_hr->{$property},
-			),
-			'property' => $property,
-		),
-		# TODO Add references
-	);
+	# TODO To common code.
+	if (ref $claim_hr->{$property} eq 'ARRAY') {
+		foreach my $claim_value (@{$claim_hr->{$property}}) {
+			push @{$self->{'claims'}}, $self->_add_claim_item($claim_hr,
+				$property, $claim_value);
+		}
+	} elsif (ref $claim_hr->{$property} eq '') {
+		push @{$self->{'claims'}}, $self->_add_claim_item($claim_hr,
+			$property, $claim_hr->{$property});
+	} else {
+		err "Unsupported reference for claim value.";
+	}
 
 	return;
 }
@@ -127,6 +125,25 @@ sub serialize {
 	}
 
 	return $struct_hr;
+}
+
+sub _add_claim_item {
+	my ($self, $claim_hr, $property, $claim_value) = @_;
+
+	return Wikidata::Datatype::Statement->new(
+		'entity' => $self->{'entity'},
+		$claim_hr->{'rank'} ? (
+			'rank' => $claim_hr->{'rank'},
+		) : (),
+		'snak' => Wikidata::Datatype::Snak->new(
+			'datatype' => 'wikibase-item',
+			'datavalue' => Wikidata::Datatype::Value::Item->new(
+				'value' => $claim_value,
+			),
+			'property' => $property,
+		),
+		# TODO Add references
+	);
 }
 
 sub _get_property {
