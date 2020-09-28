@@ -9,6 +9,7 @@ use Wikidata::Datatype::Snak;
 use Wikidata::Datatype::Statement;
 use Wikidata::Datatype::Struct::Statement;
 use Wikidata::Datatype::Value::Item;
+use Wikidata::Datatype::Value::Monolingual;
 
 our $VERSION = 0.01;
 
@@ -21,9 +22,14 @@ sub new {
 	# Claims.
 	$self->{'claims'} = [];
 
+	# Descriptions.
+	$self->{'descriptions'} = [];
+
 	# Entity.
 	$self->{'entity'} = undef;
 
+	# Labels.
+	$self->{'labels'} = [];
 
 	# Process parameters.
 	set_params($self, @params);
@@ -39,9 +45,31 @@ sub new {
 		}
 	}
 
+	# Check descriptions.
+	if (ref $self->{'descriptions'} ne 'ARRAY') {
+		err "Parameter 'descriptions' must be a array.";
+	}
+	foreach my $description (@{$self->{'descriptions'}}) {
+		if (! $description->isa('Wikidata::Datatype::Value::Monolingual')) {
+			err "Parameter 'descriptions' must contain 'Wikidata::Datatype::Value::Monolingual' ".
+				'objects only.';
+		}
+	}
+
 	# Check entity.
 	if (defined $self->{'entity'} && $self->{'entity'} !~ m/^Q\d+$/ms) {
 		err "Parameter 'entity' must contain string with Q on begin and numbers.";
+	}
+
+	# Check labels.
+	if (ref $self->{'labels'} ne 'ARRAY') {
+		err "Parameter 'labels' must be a array.";
+	}
+	foreach my $label (@{$self->{'labels'}}) {
+		if (! $label->isa('Wikidata::Datatype::Value::Monolingual')) {
+			err "Parameter 'labels' must contain 'Wikidata::Datatype::Value::Monolingual' ".
+				'objects only.';
+		}
 	}
 
 	return $self;
@@ -68,6 +96,18 @@ sub add_claim_item {
 	return;
 }
 
+sub add_descriptions {
+	my ($self, $descs_hr) = @_;
+
+	return $self->_add_monolingual($descs_hr, 'descriptions')
+}
+
+sub add_labels {
+	my ($self, $labels_hr) = @_;
+
+	return $self->_add_monolingual($labels_hr, 'labels')
+}
+
 sub parse {
 	my ($self, $struct_hr) = @_;
 
@@ -84,11 +124,19 @@ sub parse {
 		}
 	}
 
-	# Labels.
-	# TODO
-
 	# Descriptions.
-	# TODO
+	foreach my $label_hr (values %{$struct_hr->{'labels'}}) {
+		$self->add_labels({
+			$label_hr->{'language'} => $label_hr->{'value'}
+		});
+	}
+
+	# Labels.
+	foreach my $label_hr (values %{$struct_hr->{'labels'}}) {
+		$self->add_labels({
+			$label_hr->{'language'} => $label_hr->{'value'}
+		});
+	}
 
 	# Aliases.
 	# TODO
@@ -110,10 +158,20 @@ sub serialize {
 	}
 
 	# Descriptions.
-	# TODO
+	foreach my $description (@{$self->{'descriptions'}}) {
+		$struct_hr->{'descriptions'}->{$description->language} = {
+			'value' => $description->value,
+			'language' => $description->language,
+		};
+	}
 
 	# Labels.
-	# TODO
+	foreach my $label (@{$self->{'labels'}}) {
+		$struct_hr->{'labels'}->{$label->language} = {
+			'value' => $label->value,
+			'language' => $label->language,
+		};
+	}
 
 	# Claims.
 	foreach my $claim (@{$self->{'claims'}}) {
@@ -144,6 +202,19 @@ sub _add_claim_item {
 		),
 		# TODO Add references
 	);
+}
+
+sub _add_monolingual {
+	my ($self, $struct_hr, $key) = @_;
+
+	foreach my $lang (keys %{$struct_hr}) {
+		push @{$self->{$key}}, Wikidata::Datatype::Value::Monolingual->new(
+			'language' => $lang,
+			'value' => $struct_hr->{$lang},
+		);
+	}
+
+	return;
 }
 
 sub _get_property {
