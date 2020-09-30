@@ -82,7 +82,8 @@ sub add_claim_item {
 
 	push @{$self->{'claims'}},
 		map { $self->_add_claim_item($claim_hr, $property, $_) }
-		$self->_process_values($claim_hr->{$property});
+		$self->_process_values($claim_hr->{$property},
+			'Unsupported reference for claim value.');
 
 	return;
 }
@@ -94,7 +95,8 @@ sub add_claim_string {
 
 	push @{$self->{'claims'}},
 		map { $self->_add_claim_string($claim_hr, $property, $_) }
-		$self->_process_values($claim_hr->{$property});
+		$self->_process_values($claim_hr->{$property},
+			'Unsupported reference for claim value.');
 
 	return;
 }
@@ -259,14 +261,14 @@ sub _get_property {
 }
 
 sub _process_values {
-	my ($self, $value) = @_;
+	my ($self, $value, $err_msg) = @_;
 
 	if (ref $value eq 'ARRAY') {
 		return @{$value};
 	} elsif (ref $value eq '') {
 		return $value;
 	} else {
-		err "Unsupported reference for claim value.";
+		err $err_msg;
 	}
 }
 
