@@ -356,10 +356,6 @@ sub _add_claim_item {
 sub _add_claim_monolingual {
 	my ($self, $claim_hr, $property, $claim_value) = @_;
 
-	if (ref $claim_value ne 'HASH') {
-		err "Bad monolingual claim data.";
-	}
-
 	return Wikidata::Datatype::Statement->new(
 		'entity' => $self->{'entity'},
 		$claim_hr->{'rank'} ? (
@@ -368,7 +364,11 @@ sub _add_claim_monolingual {
 		'snak' => Wikidata::Datatype::Snak->new(
 			'datatype' => 'monolingualtext',
 			'datavalue' => Wikidata::Datatype::Value::Monolingual->new(
-				%{$claim_value},
+				ref $claim_value eq 'HASH' ? (
+					%{$claim_value},
+				) : (
+					'value' => $claim_value,
+				),
 			),
 			'property' => $property,
 		),
