@@ -128,9 +128,9 @@ sub parse {
 	}
 
 	# Descriptions.
-	foreach my $label_hr (values %{$struct_hr->{'labels'}}) {
-		$self->add_labels({
-			$label_hr->{'language'} => $label_hr->{'value'}
+	foreach my $descriptions_hr (values %{$struct_hr->{'descriptions'}}) {
+		$self->add_descriptions({
+			$descriptions_hr->{'language'} => $descriptions_hr->{'value'}
 		});
 	}
 
