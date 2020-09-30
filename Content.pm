@@ -481,6 +481,8 @@ sub _process_values {
 		return @{$value};
 	} elsif (ref $value eq '') {
 		return $value;
+	} elsif (ref $value eq 'HASH') {
+		return $value;
 	} else {
 		err $err_msg;
 	}
