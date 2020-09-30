@@ -108,6 +108,19 @@ sub add_claim_commons_media {
 	return;
 }
 
+sub add_claim_external_id {
+	my ($self, $claim_hr) = @_;
+
+	my $property = $self->_get_property($claim_hr);
+
+	push @{$self->{'claims'}},
+		map { $self->_add_claim_external_id($claim_hr, $property, $_) }
+		$self->_process_values($claim_hr->{$property},
+			'Unsupported reference for claim value.');
+
+	return;
+}
+
 sub add_claim_item {
 	my ($self, $claim_hr) = @_;
 
@@ -280,6 +293,25 @@ sub _add_claim_commons_media {
 		) : (),
 		'snak' => Wikidata::Datatype::Snak->new(
 			'datatype' => 'commonsMedia',
+			'datavalue' => Wikidata::Datatype::Value::String->new(
+				'value' => $claim_value,
+			),
+			'property' => $property,
+		),
+		# TODO Add references
+	);
+}
+
+sub _add_claim_external_id {
+	my ($self, $claim_hr, $property, $claim_value) = @_;
+
+	return Wikidata::Datatype::Statement->new(
+		'entity' => $self->{'entity'},
+		$claim_hr->{'rank'} ? (
+			'rank' => $claim_hr->{'rank'},
+		) : (),
+		'snak' => Wikidata::Datatype::Snak->new(
+			'datatype' => 'external-id',
 			'datavalue' => Wikidata::Datatype::Value::String->new(
 				'value' => $claim_value,
 			),
