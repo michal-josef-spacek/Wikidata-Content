@@ -134,6 +134,19 @@ sub add_claim_item {
 	return;
 }
 
+sub add_claim_monolingual {
+	my ($self, $claim_hr) = @_;
+
+	my $property = $self->_get_property($claim_hr);
+
+	push @{$self->{'claims'}},
+		map { $self->_add_claim_monolingual($claim_hr, $property, $_) }
+		$self->_process_values($claim_hr->{$property},
+			'Unsupported reference for claim value.');
+
+	return;
+}
+
 sub add_claim_string {
 	my ($self, $claim_hr) = @_;
 
@@ -339,6 +352,32 @@ sub _add_claim_item {
 		# TODO Add references
 	);
 }
+
+sub _add_claim_monolingual {
+	my ($self, $claim_hr, $property, $claim_value) = @_;
+
+	if (ref $claim_value ne 'ARRAY') {
+		err "Bad monolingual claim data.";
+	}
+	my ($claim_lang, $claim_text) = @{$claim_value};
+
+	return Wikidata::Datatype::Statement->new(
+		'entity' => $self->{'entity'},
+		$claim_hr->{'rank'} ? (
+			'rank' => $claim_hr->{'rank'},
+		) : (),
+		'snak' => Wikidata::Datatype::Snak->new(
+			'datatype' => 'monolingualtext',
+			'datavalue' => Wikidata::Datatype::Value::Monolingual->new(
+				'language' => $claim_lang,
+				'value' => $claim_text,
+			),
+			'property' => $property,
+		),
+		# TODO Add references
+	);
+}
+
 
 sub _add_claim_string {
 	my ($self, $claim_hr, $property, $claim_value) = @_;

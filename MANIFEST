@@ -23,10 +23,11 @@ t/Wikidata-Content/04-add_aliases.t
 t/Wikidata-Content/05-add_claim_commons_media.t
 t/Wikidata-Content/06-add_claim_external_id.t
 t/Wikidata-Content/07-add_claim_item.t
-t/Wikidata-Content/08-add_claim_string.t
-t/Wikidata-Content/09-add_claim_time.t
-t/Wikidata-Content/10-add_claim_url.t
-t/Wikidata-Content/11-add_descriptions.t
-t/Wikidata-Content/12-add_labels.t
+t/Wikidata-Content/08-add_claim_monolingual.t
+t/Wikidata-Content/09-add_claim_string.t
+t/Wikidata-Content/10-add_claim_time.t
+t/Wikidata-Content/11-add_claim_url.t
+t/Wikidata-Content/12-add_descriptions.t
+t/Wikidata-Content/13-add_labels.t
 xt/Wikidata-Content/01-pod_coverage.t
 xt/Wikidata-Content/02-pod.t
