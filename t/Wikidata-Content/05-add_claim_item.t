@@ -3,13 +3,13 @@ use warnings;
 
 use Test::More 'tests' => 3;
 use Test::NoWarnings;
-use Wikidata::Simple;
+use Wikidata::Content;
 
 # Test.
-my $obj = Wikidata::Simple->new(
+my $obj = Wikidata::Content->new(
 	'entity' => 'Q42',
 );
-$obj->add_claim_string({'P31' => 'text'});
+$obj->add_claim_item({'P31' => 'Q5'});
 my $ret_hr = $obj->serialize;
 is_deeply(
 	$ret_hr,
@@ -18,10 +18,13 @@ is_deeply(
 			'P31' => [
 				{
 					'mainsnak' => {
-						'datatype' => 'string',
+						'datatype' => 'wikibase-item',
 						'datavalue' => {
-							'type' => 'string',
-							'value' => 'text',
+							'type' => 'wikibase-entityid',
+							'value' => {
+								'entity-type' => 'item',
+								'id' => 'Q5',
+							},
 						},
 						'property' => 'P31',
 						'snaktype' => 'value',
@@ -37,10 +40,10 @@ is_deeply(
 );
 
 # Test.
-$obj = Wikidata::Simple->new(
+$obj = Wikidata::Content->new(
 	'entity' => 'Q42',
 );
-$obj->add_claim_string({'P31' => ['foo', 'bar']});
+$obj->add_claim_item({'P31' => ['Q5', 'Q6']});
 $ret_hr = $obj->serialize;
 is_deeply(
 	$ret_hr,
@@ -49,10 +52,13 @@ is_deeply(
 			'P31' => [
 				{
 					'mainsnak' => {
-						'datatype' => 'string',
+						'datatype' => 'wikibase-item',
 						'datavalue' => {
-							'type' => 'string',
-							'value' => 'foo',
+							'type' => 'wikibase-entityid',
+							'value' => {
+								'entity-type' => 'item',
+								'id' => 'Q5',
+							},
 						},
 						'property' => 'P31',
 						'snaktype' => 'value',
@@ -62,10 +68,13 @@ is_deeply(
 				},
 				{
 					'mainsnak' => {
-						'datatype' => 'string',
+						'datatype' => 'wikibase-item',
 						'datavalue' => {
-							'type' => 'string',
-							'value' => 'bar',
+							'type' => 'wikibase-entityid',
+							'value' => {
+								'entity-type' => 'item',
+								'id' => 'Q6',
+							},
 						},
 						'property' => 'P31',
 						'snaktype' => 'value',

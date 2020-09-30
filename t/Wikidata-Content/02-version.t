@@ -3,7 +3,7 @@ use warnings;
 
 use Test::More 'tests' => 2;
 use Test::NoWarnings;
-use Wikidata::Simple;
+use Wikidata::Content;
 
 # Test.
-is($Wikidata::Simple::VERSION, 0.01, 'Version.');
+is($Wikidata::Content::VERSION, 0.01, 'Version.');

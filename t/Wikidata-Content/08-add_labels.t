@@ -4,18 +4,18 @@ use warnings;
 use Test::More 'tests' => 2;
 use Test::NoWarnings;
 use Unicode::UTF8 qw(decode_utf8);
-use Wikidata::Simple;
+use Wikidata::Content;
 
 # Test.
-my $obj = Wikidata::Simple->new(
+my $obj = Wikidata::Content->new(
 	'entity' => 'Q42',
 );
-$obj->add_descriptions({'cs' => decode_utf8('Příklad'), 'en' => 'Example'});
+$obj->add_labels({'cs' => decode_utf8('Příklad'), 'en' => 'Example'});
 my $ret_hr = $obj->serialize;
 is_deeply(
 	$ret_hr,
 	{
-		'descriptions' => {
+		'labels' => {
 			'cs' => {
 				'language' => 'cs',
 				'value' => decode_utf8('Příklad'),
@@ -27,6 +27,6 @@ is_deeply(
 		},
 		'title' => 'Q42',
 	},
-	'Multiple descriptions.',
+	'Multiple labels.',
 );
 

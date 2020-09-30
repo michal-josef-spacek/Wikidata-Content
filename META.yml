@@ -1,5 +1,5 @@
 ---
-abstract: 'Wikidata simple.'
+abstract: 'Wikidata content class.'
 author:
   - 'Michal Josef Spacek <skim@cpan.org>'
 build_requires:
@@ -17,7 +17,7 @@ license: bsd
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: 1.4
-name: Wikidata-Simple
+name: Wikidata-Content
 no_index:
   directory:
     - inc
@@ -29,8 +29,8 @@ requires:
   Wikidata::Datatype: 0
   perl: 5.6.2
 resources:
-  bugtracker: https://github.com/michal-josef-spacek/Wikidata-Simple/issues
-  homepage: https://github.com/michal-josef-spacek/Wikidata-Simple
+  bugtracker: https://github.com/michal-josef-spacek/Wikidata-Content/issues
+  homepage: https://github.com/michal-josef-spacek/Wikidata-Content
   license: http://opensource.org/licenses/bsd-license.php
-  repository: git://github.com/michal-josef-spacek/Wikidata-Simple
+  repository: git://github.com/michal-josef-spacek/Wikidata-Content
 version: '0.01'

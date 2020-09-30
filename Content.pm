@@ -1,4 +1,4 @@
-package Wikidata::Simple;
+package Wikidata::Content;
 
 use strict;
 use warnings;

@@ -7,8 +7,8 @@ use Test::NoWarnings;
 BEGIN {
 
 	# Test.
-	use_ok('Wikidata::Simple');
+	use_ok('Wikidata::Content');
 }
 
 # Test.
-require_ok('Wikidata::Simple');
+require_ok('Wikidata::Content');

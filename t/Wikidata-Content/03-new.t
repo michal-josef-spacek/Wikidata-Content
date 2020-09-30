@@ -5,17 +5,17 @@ use English;
 use Error::Pure::Utils qw(clean);
 use Test::More 'tests' => 3;
 use Test::NoWarnings;
-use Wikidata::Simple;
+use Wikidata::Content;
 
 # Test.
-my $obj = Wikidata::Simple->new(
+my $obj = Wikidata::Content->new(
 	'entity' => 'Q42',
 );
-isa_ok($obj, 'Wikidata::Simple');
+isa_ok($obj, 'Wikidata::Content');
 
 # Test.
 eval {
-	Wikidata::Simple->new(
+	Wikidata::Content->new(
 		'entity' => 'q42',
 	);
 };
