@@ -1,8 +1,6 @@
 use strict;
 use warnings;
 
-use English;
-use Error::Pure::Utils qw(clean);
 use Test::More 'tests' => 3;
 use Test::NoWarnings;
 use Wikidata::Simple;

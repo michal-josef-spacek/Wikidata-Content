@@ -19,9 +19,10 @@ Simple.pm
 t/Wikidata-Simple/01-use.t
 t/Wikidata-Simple/02-version.t
 t/Wikidata-Simple/03-new.t
-t/Wikidata-Simple/04-add_claim_item.t
-t/Wikidata-Simple/05-add_claim_string.t
-t/Wikidata-Simple/06-add_descriptions.t
-t/Wikidata-Simple/07-add_labels.t
+t/Wikidata-Simple/04-add_aliases.t
+t/Wikidata-Simple/05-add_claim_item.t
+t/Wikidata-Simple/06-add_claim_string.t
+t/Wikidata-Simple/07-add_descriptions.t
+t/Wikidata-Simple/08-add_labels.t
 xt/Wikidata-Simple/01-pod_coverage.t
 xt/Wikidata-Simple/02-pod.t

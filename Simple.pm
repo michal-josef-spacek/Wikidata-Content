@@ -19,6 +19,9 @@ sub new {
 	# Create object.
 	my $self = bless {}, $class;
 
+	# Aliases.
+	$self->{'aliases'} = [];
+
 	# Claims.
 	$self->{'claims'} = [];
 
@@ -33,6 +36,17 @@ sub new {
 
 	# Process parameters.
 	set_params($self, @params);
+
+	# Check aliases.
+	if (ref $self->{'aliases'} ne 'ARRAY') {
+		err "Parameter 'aliases' must be a reference to array.";
+	}
+	foreach my $alias (@{$self->{'aliases'}}) {
+		if (! $alias->isa('Wikidata::Datatype::Value::Monolingual')) {
+			err "Parameter 'alias' must contain 'Wikidata::Datatype::Value::Monolingual' ".
+				'objects only.';
+		}
+	}
 
 	# Check claims.
 	if (ref $self->{'claims'} ne 'ARRAY') {
@@ -73,6 +87,12 @@ sub new {
 	}
 
 	return $self;
+}
+
+sub add_aliases {
+	my ($self, $aliases_hr) = @_;
+
+	return $self->_add_monolingual($aliases_hr, 'aliases')
 }
 
 sub add_claim_item {
@@ -162,6 +182,20 @@ sub serialize {
 		$struct_hr->{'title'} = $self->{'entity'};
 	}
 
+	# Aliases.
+	foreach my $alias (@{$self->{'aliases'}}) {
+		if (! exists $struct_hr->{'aliases'}) {
+			$struct_hr->{'aliases'} = {};
+		}
+		if (! exists $struct_hr->{'aliases'}->{$alias->language}) {
+			$struct_hr->{'aliases'}->{$alias->language} = [];
+		}
+		push @{$struct_hr->{'aliases'}->{$alias->language}}, {
+			'value' => $alias->value,
+			'language' => $alias->language,
+		};
+	}
+
 	# Descriptions.
 	foreach my $description (@{$self->{'descriptions'}}) {
 		$struct_hr->{'descriptions'}->{$description->language} = {
@@ -232,10 +266,15 @@ sub _add_monolingual {
 	my ($self, $struct_hr, $key) = @_;
 
 	foreach my $lang (keys %{$struct_hr}) {
-		push @{$self->{$key}}, Wikidata::Datatype::Value::Monolingual->new(
-			'language' => $lang,
-			'value' => $struct_hr->{$lang},
-		);
+		push @{$self->{$key}},
+			map {
+				Wikidata::Datatype::Value::Monolingual->new(
+					'language' => $lang,
+					'value' => $_,
+				);
+			}
+			$self->_process_values($struct_hr->{$lang},
+				'Unsupported reference for alias value.');
 	}
 
 	return;
