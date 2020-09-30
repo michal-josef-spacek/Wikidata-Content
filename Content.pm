@@ -164,7 +164,14 @@ sub parse {
 	}
 
 	# Aliases.
-	# TODO
+	foreach my $alias_lang (keys %{$struct_hr->{'aliases'}}) {
+		$self->add_aliases({
+			$alias_lang => [
+				map { $_->{'value'} }
+					@{$struct_hr->{'aliases'}->{$alias_lang}}
+			]
+		});
+	}
 
 	# Sitelinks.
 	# TODO
