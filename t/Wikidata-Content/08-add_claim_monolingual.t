@@ -9,7 +9,7 @@ use Wikidata::Content;
 my $obj = Wikidata::Content->new(
 	'entity' => 'Q42',
 );
-$obj->add_claim_monolingual({'P1476' => [['en', 'foo']]});
+$obj->add_claim_monolingual({'P1476' => {'language' => 'en', 'value' => 'foo'}});
 my $ret_hr = $obj->serialize;
 is_deeply(
 	$ret_hr,
