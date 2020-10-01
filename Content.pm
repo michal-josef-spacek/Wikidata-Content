@@ -119,31 +119,6 @@ sub add_claim {
 	return;
 }
 
-sub _add_claim {
-	my ($self, $type, $claim_hr, $property, $claim_value) = @_;
-
-	my $class = $CLAIMS_CLASSES{$type};
-
-	return Wikidata::Datatype::Statement->new(
-		'entity' => $self->{'entity'},
-		$claim_hr->{'rank'} ? (
-			'rank' => $claim_hr->{'rank'},
-		) : (),
-		'snak' => Wikidata::Datatype::Snak->new(
-			'datatype' => $type,
-			'datavalue' => $class->new(
-				ref $claim_value eq 'HASH' ? (
-					%{$claim_value},
-				) : (
-					'value' => $claim_value,
-				),
-			),
-			'property' => $property,
-		),
-		# TODO Add references
-	);
-}
-
 sub add_claim_commons_media {
 	my ($self, $claim_hr) = @_;
 
@@ -294,6 +269,31 @@ sub serialize {
 	}
 
 	return $struct_hr;
+}
+
+sub _add_claim {
+	my ($self, $type, $claim_hr, $property, $claim_value) = @_;
+
+	my $class = $CLAIMS_CLASSES{$type};
+
+	return Wikidata::Datatype::Statement->new(
+		'entity' => $self->{'entity'},
+		$claim_hr->{'rank'} ? (
+			'rank' => $claim_hr->{'rank'},
+		) : (),
+		'snak' => Wikidata::Datatype::Snak->new(
+			'datatype' => $type,
+			'datavalue' => $class->new(
+				ref $claim_value eq 'HASH' ? (
+					%{$claim_value},
+				) : (
+					'value' => $claim_value,
+				),
+			),
+			'property' => $property,
+		),
+		# TODO Add references
+	);
 }
 
 sub _add_monolingual {
