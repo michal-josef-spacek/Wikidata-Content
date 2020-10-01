@@ -5,11 +5,22 @@ use warnings;
 
 use Class::Utils qw(set_params);
 use Error::Pure qw(err);
+use Readonly;
 use Wikidata::Datatype::Snak;
 use Wikidata::Datatype::Statement;
 use Wikidata::Datatype::Struct::Statement;
 use Wikidata::Datatype::Value::Item;
 use Wikidata::Datatype::Value::Monolingual;
+
+Readonly::Hash our %CLAIMS_CLASSES => (
+	'commonsMedia' => 'Wikidata::Datatype::Value::String',
+	'external-id' => 'Wikidata::Datatype::Value::String',
+	'wikibase-item' => 'Wikidata::Datatype::Value::Item',
+	'monolingualtext' => 'Wikidata::Datatype::Value::Monolingual',
+	'string' => 'Wikidata::Datatype::Value::String',
+	'time' => 'Wikidata::Datatype::Value::Time',
+	'url' => 'Wikidata::Datatype::Value::String',
+);
 
 our $VERSION = 0.01;
 
@@ -95,95 +106,84 @@ sub add_aliases {
 	return $self->_add_monolingual($aliases_hr, 'aliases')
 }
 
-sub add_claim_commons_media {
-	my ($self, $claim_hr) = @_;
+sub add_claim {
+	my ($self, $type, $claim_hr) = @_;
 
 	my $property = $self->_get_property($claim_hr);
 
 	push @{$self->{'claims'}},
-		map { $self->_add_claim_commons_media($claim_hr, $property, $_) }
+		map { $self->_add_claim($type, $claim_hr, $property, $_) }
 		$self->_process_values($claim_hr->{$property},
 			'Unsupported reference for claim value.');
 
 	return;
+}
+
+sub _add_claim {
+	my ($self, $type, $claim_hr, $property, $claim_value) = @_;
+
+	my $class = $CLAIMS_CLASSES{$type};
+
+	return Wikidata::Datatype::Statement->new(
+		'entity' => $self->{'entity'},
+		$claim_hr->{'rank'} ? (
+			'rank' => $claim_hr->{'rank'},
+		) : (),
+		'snak' => Wikidata::Datatype::Snak->new(
+			'datatype' => $type,
+			'datavalue' => $class->new(
+				ref $claim_value eq 'HASH' ? (
+					%{$claim_value},
+				) : (
+					'value' => $claim_value,
+				),
+			),
+			'property' => $property,
+		),
+		# TODO Add references
+	);
+}
+
+sub add_claim_commons_media {
+	my ($self, $claim_hr) = @_;
+
+	return $self->add_claim('commonsMedia', $claim_hr);
 }
 
 sub add_claim_external_id {
 	my ($self, $claim_hr) = @_;
 
-	my $property = $self->_get_property($claim_hr);
-
-	push @{$self->{'claims'}},
-		map { $self->_add_claim_external_id($claim_hr, $property, $_) }
-		$self->_process_values($claim_hr->{$property},
-			'Unsupported reference for claim value.');
-
-	return;
+	return $self->add_claim('external-id', $claim_hr);
 }
 
 sub add_claim_item {
 	my ($self, $claim_hr) = @_;
 
-	my $property = $self->_get_property($claim_hr);
-
-	push @{$self->{'claims'}},
-		map { $self->_add_claim_item($claim_hr, $property, $_) }
-		$self->_process_values($claim_hr->{$property},
-			'Unsupported reference for claim value.');
-
-	return;
+	return $self->add_claim('wikibase-item', $claim_hr);
 }
 
 sub add_claim_monolingual {
 	my ($self, $claim_hr) = @_;
 
-	my $property = $self->_get_property($claim_hr);
-
-	push @{$self->{'claims'}},
-		map { $self->_add_claim_monolingual($claim_hr, $property, $_) }
-		$self->_process_values($claim_hr->{$property},
-			'Unsupported reference for claim value.');
-
-	return;
+	return $self->add_claim('monolingualtext', $claim_hr);
 }
 
 sub add_claim_string {
 	my ($self, $claim_hr) = @_;
 
-	my $property = $self->_get_property($claim_hr);
-
-	push @{$self->{'claims'}},
-		map { $self->_add_claim_string($claim_hr, $property, $_) }
-		$self->_process_values($claim_hr->{$property},
-			'Unsupported reference for claim value.');
-
-	return;
+	return $self->add_claim('string', $claim_hr);
 }
 
 sub add_claim_time {
 	my ($self, $claim_hr) = @_;
 
-	my $property = $self->_get_property($claim_hr);
-
-	push @{$self->{'claims'}},
-		map { $self->_add_claim_time($claim_hr, $property, $_) }
-		$self->_process_values($claim_hr->{$property},
-			'Unsupported reference for claim value.');
-
-	return;
+	return $self->add_claim('time', $claim_hr);
 }
 
 sub add_claim_url {
 	my ($self, $claim_hr) = @_;
 
-	my $property = $self->_get_property($claim_hr);
-
-	push @{$self->{'claims'}},
-		map { $self->_add_claim_url($claim_hr, $property, $_) }
-		$self->_process_values($claim_hr->{$property},
-			'Unsupported reference for claim value.');
-
-	return;
+	return $self->add_claim('url', $claim_hr);
 }
 
 sub add_descriptions {
@@ -294,145 +294,6 @@ sub serialize {
 	}
 
 	return $struct_hr;
-}
-
-sub _add_claim_commons_media {
-	my ($self, $claim_hr, $property, $claim_value) = @_;
-
-	return Wikidata::Datatype::Statement->new(
-		'entity' => $self->{'entity'},
-		$claim_hr->{'rank'} ? (
-			'rank' => $claim_hr->{'rank'},
-		) : (),
-		'snak' => Wikidata::Datatype::Snak->new(
-			'datatype' => 'commonsMedia',
-			'datavalue' => Wikidata::Datatype::Value::String->new(
-				'value' => $claim_value,
-			),
-			'property' => $property,
-		),
-		# TODO Add references
-	);
-}
-
-sub _add_claim_external_id {
-	my ($self, $claim_hr, $property, $claim_value) = @_;
-
-	return Wikidata::Datatype::Statement->new(
-		'entity' => $self->{'entity'},
-		$claim_hr->{'rank'} ? (
-			'rank' => $claim_hr->{'rank'},
-		) : (),
-		'snak' => Wikidata::Datatype::Snak->new(
-			'datatype' => 'external-id',
-			'datavalue' => Wikidata::Datatype::Value::String->new(
-				'value' => $claim_value,
-			),
-			'property' => $property,
-		),
-		# TODO Add references
-	);
-}
-
-sub _add_claim_item {
-	my ($self, $claim_hr, $property, $claim_value) = @_;
-
-	return Wikidata::Datatype::Statement->new(
-		'entity' => $self->{'entity'},
-		$claim_hr->{'rank'} ? (
-			'rank' => $claim_hr->{'rank'},
-		) : (),
-		'snak' => Wikidata::Datatype::Snak->new(
-			'datatype' => 'wikibase-item',
-			'datavalue' => Wikidata::Datatype::Value::Item->new(
-				'value' => $claim_value,
-			),
-			'property' => $property,
-		),
-		# TODO Add references
-	);
-}
-
-sub _add_claim_monolingual {
-	my ($self, $claim_hr, $property, $claim_value) = @_;
-
-	return Wikidata::Datatype::Statement->new(
-		'entity' => $self->{'entity'},
-		$claim_hr->{'rank'} ? (
-			'rank' => $claim_hr->{'rank'},
-		) : (),
-		'snak' => Wikidata::Datatype::Snak->new(
-			'datatype' => 'monolingualtext',
-			'datavalue' => Wikidata::Datatype::Value::Monolingual->new(
-				ref $claim_value eq 'HASH' ? (
-					%{$claim_value},
-				) : (
-					'value' => $claim_value,
-				),
-			),
-			'property' => $property,
-		),
-		# TODO Add references
-	);
-}
-
-
-sub _add_claim_string {
-	my ($self, $claim_hr, $property, $claim_value) = @_;
-
-	return Wikidata::Datatype::Statement->new(
-		'entity' => $self->{'entity'},
-		$claim_hr->{'rank'} ? (
-			'rank' => $claim_hr->{'rank'},
-		) : (),
-		'snak' => Wikidata::Datatype::Snak->new(
-			'datatype' => 'string',
-			'datavalue' => Wikidata::Datatype::Value::String->new(
-				'value' => $claim_value,
-			),
-			'property' => $property,
-		),
-		# TODO Add references
-	);
-}
-
-sub _add_claim_time {
-	my ($self, $claim_hr, $property, $claim_value) = @_;
-
-	return Wikidata::Datatype::Statement->new(
-		'entity' => $self->{'entity'},
-		$claim_hr->{'rank'} ? (
-			'rank' => $claim_hr->{'rank'},
-		) : (),
-		'snak' => Wikidata::Datatype::Snak->new(
-			'datatype' => 'time',
-			'datavalue' => Wikidata::Datatype::Value::Time->new(
-				'value' => $claim_value,
-				# TODO
-			),
-			'property' => $property,
-		),
-		# TODO Add references
-	);
-}
-
-sub _add_claim_url {
-	my ($self, $claim_hr, $property, $claim_value) = @_;
-
-	return Wikidata::Datatype::Statement->new(
-		'entity' => $self->{'entity'},
-		$claim_hr->{'rank'} ? (
-			'rank' => $claim_hr->{'rank'},
-		) : (),
-		'snak' => Wikidata::Datatype::Snak->new(
-			'datatype' => 'url',
-			'datavalue' => Wikidata::Datatype::Value::String->new(
-				'value' => $claim_value,
-			),
-			'property' => $property,
-		),
-		# TODO Add references
-	);
 }
 
 sub _add_monolingual {
