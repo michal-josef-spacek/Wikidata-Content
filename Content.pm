@@ -6,8 +6,10 @@ use warnings;
 use Class::Utils qw(set_params);
 use Error::Pure qw(err);
 use Readonly;
+use Wikidata::Datatype::Sitelink;
 use Wikidata::Datatype::Snak;
 use Wikidata::Datatype::Statement;
+use Wikidata::Datatype::Struct::Sitelink;
 use Wikidata::Datatype::Struct::Statement;
 use Wikidata::Datatype::Value::Item;
 use Wikidata::Datatype::Value::Monolingual;
@@ -44,6 +46,9 @@ sub new {
 
 	# Labels.
 	$self->{'labels'} = [];
+
+	# Sitelinks.
+	$self->{'sitelinks'} = [];
 
 	# Process parameters.
 	set_params($self, @params);
@@ -94,6 +99,17 @@ sub new {
 		if (! $label->isa('Wikidata::Datatype::Value::Monolingual')) {
 			err "Parameter 'labels' must contain 'Wikidata::Datatype::Value::Monolingual' ".
 				'objects only.';
+		}
+	}
+
+	# Check sitelinks.
+	if (ref $self->{'sitelinks'} ne 'ARRAY') {
+		err "Parameter 'sitelinks' must be a array.";
+	}
+	foreach my $sitelink (@{$self->{'sitelinks'}}) {
+		if (! $sitelink->isa('Wikidata::Datatype::Sitelink')) {
+			err "Parameter 'sitelinks' must contain ".
+				"'Wikidata::Datatype::Sitelink' objects only.";
 		}
 	}
 
@@ -173,6 +189,19 @@ sub add_labels {
 	return $self->_add_monolingual($labels_hr, 'labels')
 }
 
+sub add_sitelinks {
+	my ($self, $sitelinks_hr) = @_;
+
+	foreach my $sitelink (keys %{$sitelinks_hr}) {
+		push @{$self->{'sitelinks'}}, Wikidata::Datatype::Sitelink->new(
+			'site' => $sitelink,
+			'title' => $sitelinks_hr->{$sitelink},
+		);
+	}
+
+	return;
+}
+
 sub parse {
 	my ($self, $struct_hr) = @_;
 
@@ -214,7 +243,11 @@ sub parse {
 	}
 
 	# Sitelinks.
-	# TODO
+	foreach my $sitelink (keys %{$struct_hr->{'sitelinks'}}) {
+		$self->add_sitelinks({
+			$sitelink => $struct_hr->{'sitelinks'}->title,
+		});
+	}
 
 	return;
 }
@@ -266,6 +299,12 @@ sub serialize {
 		}
 		push @{$struct_hr->{'claims'}->{$claim->snak->property}},
 			Wikidata::Datatype::Struct::Statement::obj2struct($claim);
+	}
+
+	# Sitelinks.
+	foreach my $sitelink (@{$self->{'sitelinks'}}) {
+		$struct_hr->{'sitelinks'}->{$sitelink->site} =
+			Wikidata::Datatype::Struct::Sitelink::obj2struct($sitelink);
 	}
 
 	return $struct_hr;
