@@ -21,6 +21,7 @@ recursive_author_tests('xt');
 requires 'Class::Utils' => 0.03;
 requires 'Error::Pure' => 0.15;
 requires 'Wikidata::Datatype' => 0;
+requires 'Wikidata::Datatype::Struct' => 0;
 resources 'bugtracker' => 'https://github.com/michal-josef-spacek/Wikidata-Content/issues',
 resources 'homepage' => 'https://github.com/michal-josef-spacek/Wikidata-Content';
 resources 'repository' => 'git://github.com/michal-josef-spacek/Wikidata-Content';
