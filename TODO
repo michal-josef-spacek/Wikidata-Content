@@ -5,7 +5,8 @@ TODO
 3. Pridat implicitni jazyk pro monolingual do kontruktoru.
 4. serialize() a parse() presunout jinam, je to uplne jina cinnost nez vytvareni obsahu.
 Do Wikidata::Content::Struct
-5.
+5. Nahradit v testech pouziti serialize za interni metody. Ty vytvorit.
+6.
 
 Applied
 =======
