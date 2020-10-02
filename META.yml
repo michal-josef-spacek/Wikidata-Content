@@ -27,7 +27,6 @@ requires:
   Class::Utils: 0.03
   Error::Pure: 0.15
   Wikidata::Datatype: 0
-  Wikidata::Datatype::Struct: 0
   perl: 5.6.2
 resources:
   bugtracker: https://github.com/michal-josef-spacek/Wikidata-Content/issues

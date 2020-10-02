@@ -10,23 +10,5 @@ use Wikidata::Content;
 my $obj = Wikidata::Content->new(
 	'entity' => 'Q42',
 );
-$obj->add_labels({'cs' => decode_utf8('Příklad'), 'en' => 'Example'});
-my $ret_hr = $obj->serialize;
-is_deeply(
-	$ret_hr,
-	{
-		'labels' => {
-			'cs' => {
-				'language' => 'cs',
-				'value' => decode_utf8('Příklad'),
-			},
-			'en' => {
-				'language' => 'en',
-				'value' => 'Example',
-			},
-		},
-		'title' => 'Q42',
-	},
-	'Multiple labels.',
-);
-
+my $ret = $obj->add_labels({'cs' => decode_utf8('Příklad'), 'en' => 'Example'});
+is($ret, undef, 'Add labels.');

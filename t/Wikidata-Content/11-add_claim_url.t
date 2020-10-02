@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More 'tests' => 2;
+use Test::More 'tests' => 6;
 use Test::NoWarnings;
 use Wikidata::Content;
 
@@ -9,29 +9,10 @@ use Wikidata::Content;
 my $obj = Wikidata::Content->new(
 	'entity' => 'Q42',
 );
-$obj->add_claim_url({'P856' => 'https://skim.cz'});
-my $ret_hr = $obj->serialize;
-is_deeply(
-	$ret_hr,
-	{
-		'claims' => {
-			'P856' => [
-				{
-					'mainsnak' => {
-						'datatype' => 'url',
-						'datavalue' => {
-							'type' => 'string',
-							'value' => 'https://skim.cz'
-						},
-						'property' => 'P856',
-						'snaktype' => 'value',
-					},
-					'rank' => 'normal',
-					'type' => 'statement',
-				},
-			],
-		},
-		'title' => 'Q42',
-	},
-	'Single value.',
-);
+my $ret = $obj->add_claim_url({'P856' => 'https://skim.cz'});
+is($ret, undef, 'Add claim.');
+my ($claim) = $obj->claims;
+is($claim->entity, 'Q42', 'Entity name.');
+is($claim->snak->datatype, 'url', 'Claim datatype.');
+is($claim->snak->property, 'P856', 'Claim property.');
+is($claim->snak->datavalue->value, 'https://skim.cz', 'Get value.');

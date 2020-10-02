@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More 'tests' => 3;
+use Test::More 'tests' => 13;
 use Test::NoWarnings;
 use Wikidata::Content;
 
@@ -9,66 +9,24 @@ use Wikidata::Content;
 my $obj = Wikidata::Content->new(
 	'entity' => 'Q42',
 );
-$obj->add_claim_monolingual({'P1476' => {'language' => 'en', 'value' => 'foo'}});
-my $ret_hr = $obj->serialize;
-is_deeply(
-	$ret_hr,
-	{
-		'claims' => {
-			'P1476' => [
-				{
-					'mainsnak' => {
-						'datatype' => 'monolingualtext',
-						'datavalue' => {
-							'type' => 'monolingualtext',
-							'value' => {
-								'text' => 'foo',
-								'language' => 'en',
-							},
-						},
-						'property' => 'P1476',
-						'snaktype' => 'value',
-					},
-					'rank' => 'normal',
-					'type' => 'statement',
-				},
-			],
-		},
-		'title' => 'Q42',
-	},
-	'Single value with explicit language.',
-);
+my $ret = $obj->add_claim_monolingual({'P1476' => {'language' => 'cs', 'value' => 'foo'}});
+is($ret, undef, 'Add claim.');
+my ($claim) = $obj->claims;
+is($claim->entity, 'Q42', 'Entity name.');
+is($claim->snak->datatype, 'monolingualtext', 'Claim datatype.');
+is($claim->snak->property, 'P1476', 'Claim property.');
+is($claim->snak->datavalue->value, 'foo', 'Get value.');
+is($claim->snak->datavalue->language, 'cs', 'Get value language.');
 
 # Test.
 $obj = Wikidata::Content->new(
 	'entity' => 'Q42',
 );
-$obj->add_claim_monolingual({'P1476' => 'foo'});
-$ret_hr = $obj->serialize;
-is_deeply(
-	$ret_hr,
-	{
-		'claims' => {
-			'P1476' => [
-				{
-					'mainsnak' => {
-						'datatype' => 'monolingualtext',
-						'datavalue' => {
-							'type' => 'monolingualtext',
-							'value' => {
-								'text' => 'foo',
-								'language' => 'en',
-							},
-						},
-						'property' => 'P1476',
-						'snaktype' => 'value',
-					},
-					'rank' => 'normal',
-					'type' => 'statement',
-				},
-			],
-		},
-		'title' => 'Q42',
-	},
-	"Single value with default 'en' language.",
-);
+$ret = $obj->add_claim_monolingual({'P1476' => 'foo'});
+is($ret, undef, 'Add claim.');
+($claim) = $obj->claims;
+is($claim->entity, 'Q42', 'Entity name.');
+is($claim->snak->datatype, 'monolingualtext', 'Claim datatype.');
+is($claim->snak->property, 'P1476', 'Claim property.');
+is($claim->snak->datavalue->value, 'foo', 'Get value.');
+is($claim->snak->datavalue->language, 'en', 'Get value language.');

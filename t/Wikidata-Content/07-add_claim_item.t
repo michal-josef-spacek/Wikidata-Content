@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More 'tests' => 3;
+use Test::More 'tests' => 8;
 use Test::NoWarnings;
 use Wikidata::Content;
 
@@ -9,82 +9,19 @@ use Wikidata::Content;
 my $obj = Wikidata::Content->new(
 	'entity' => 'Q42',
 );
-$obj->add_claim_item({'P31' => 'Q5'});
-my $ret_hr = $obj->serialize;
-is_deeply(
-	$ret_hr,
-	{
-		'claims' => {
-			'P31' => [
-				{
-					'mainsnak' => {
-						'datatype' => 'wikibase-item',
-						'datavalue' => {
-							'type' => 'wikibase-entityid',
-							'value' => {
-								'entity-type' => 'item',
-								'id' => 'Q5',
-							},
-						},
-						'property' => 'P31',
-						'snaktype' => 'value',
-					},
-					'rank' => 'normal',
-					'type' => 'statement',
-				},
-			],
-		},
-		'title' => 'Q42',
-	},
-	'Single value.',
-);
+my $ret = $obj->add_claim_item({'P31' => 'Q5'});
+is($ret, undef, 'Add claim.');
+my ($claim) = $obj->claims;
+is($claim->entity, 'Q42', 'Entity name.');
+is($claim->snak->datatype, 'wikibase-item', 'Claim datatype.');
+is($claim->snak->property, 'P31', 'Claim property.');
+is($claim->snak->datavalue->value, 'Q5', 'Get value.');
 
 # Test.
 $obj = Wikidata::Content->new(
 	'entity' => 'Q42',
 );
-$obj->add_claim_item({'P31' => ['Q5', 'Q6']});
-$ret_hr = $obj->serialize;
-is_deeply(
-	$ret_hr,
-	{
-		'claims' => {
-			'P31' => [
-				{
-					'mainsnak' => {
-						'datatype' => 'wikibase-item',
-						'datavalue' => {
-							'type' => 'wikibase-entityid',
-							'value' => {
-								'entity-type' => 'item',
-								'id' => 'Q5',
-							},
-						},
-						'property' => 'P31',
-						'snaktype' => 'value',
-					},
-					'rank' => 'normal',
-					'type' => 'statement',
-				},
-				{
-					'mainsnak' => {
-						'datatype' => 'wikibase-item',
-						'datavalue' => {
-							'type' => 'wikibase-entityid',
-							'value' => {
-								'entity-type' => 'item',
-								'id' => 'Q6',
-							},
-						},
-						'property' => 'P31',
-						'snaktype' => 'value',
-					},
-					'rank' => 'normal',
-					'type' => 'statement',
-				},
-			],
-		},
-		'title' => 'Q42',
-	},
-	'Multiple values.',
-);
+$ret = $obj->add_claim_item({'P31' => ['Q5', 'Q6']});
+is($ret, undef, 'Add claim.');
+my @claims = $obj->claims;
+is(@claims, 2, 'Get two claims.');

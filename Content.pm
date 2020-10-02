@@ -9,10 +9,10 @@ use Readonly;
 use Wikidata::Datatype::Sitelink;
 use Wikidata::Datatype::Snak;
 use Wikidata::Datatype::Statement;
-use Wikidata::Datatype::Struct::Sitelink;
-use Wikidata::Datatype::Struct::Statement;
 use Wikidata::Datatype::Value::Item;
 use Wikidata::Datatype::Value::Monolingual;
+use Wikidata::Datatype::Value::String;
+use Wikidata::Datatype::Value::Time;
 
 Readonly::Hash our %CLAIMS_CLASSES => (
 	'commonsMedia' => 'Wikidata::Datatype::Value::String',
@@ -202,112 +202,40 @@ sub add_sitelinks {
 	return;
 }
 
-sub parse {
-	my ($self, $struct_hr) = @_;
-
-	# Title.
-	$self->{'entity'} = $struct_hr->{'title'};
-
-	# Claims.
-	foreach my $claim_property (keys %{$struct_hr->{'claims'}}) {
-		foreach my $claim_hr (@{$struct_hr->{'claims'}->{$claim_property}}) {
-			push @{$self->{'claims'}},
-				Wikidata::Datatype::Struct::Statement::struct2obj(
-					$claim_hr, $self->{'entity'},
-				);
-		}
-	}
-
-	# Descriptions.
-	foreach my $descriptions_hr (values %{$struct_hr->{'descriptions'}}) {
-		$self->add_descriptions({
-			$descriptions_hr->{'language'} => $descriptions_hr->{'value'}
-		});
-	}
-
-	# Labels.
-	foreach my $label_hr (values %{$struct_hr->{'labels'}}) {
-		$self->add_labels({
-			$label_hr->{'language'} => $label_hr->{'value'}
-		});
-	}
-
-	# Aliases.
-	foreach my $alias_lang (keys %{$struct_hr->{'aliases'}}) {
-		$self->add_aliases({
-			$alias_lang => [
-				map { $_->{'value'} }
-					@{$struct_hr->{'aliases'}->{$alias_lang}}
-			]
-		});
-	}
-
-	# Sitelinks.
-	foreach my $sitelink (keys %{$struct_hr->{'sitelinks'}}) {
-		$self->add_sitelinks({
-			$sitelink => $struct_hr->{'sitelinks'}->title,
-		});
-	}
-
-	return;
-}
-
-sub serialize {
+sub aliases {
 	my $self = shift;
 
-	my $struct_hr = {};
+	return @{$self->{'aliases'}};
+}
 
-	# Title
-	if (defined $self->{'entity'}) {
-		$struct_hr->{'title'} = $self->{'entity'};
-	}
+sub claims {
+	my $self = shift;
 
-	# Aliases.
-	foreach my $alias (@{$self->{'aliases'}}) {
-		if (! exists $struct_hr->{'aliases'}) {
-			$struct_hr->{'aliases'} = {};
-		}
-		if (! exists $struct_hr->{'aliases'}->{$alias->language}) {
-			$struct_hr->{'aliases'}->{$alias->language} = [];
-		}
-		push @{$struct_hr->{'aliases'}->{$alias->language}}, {
-			'value' => $alias->value,
-			'language' => $alias->language,
-		};
-	}
+	return @{$self->{'claims'}};
+}
 
-	# Descriptions.
-	foreach my $description (@{$self->{'descriptions'}}) {
-		$struct_hr->{'descriptions'}->{$description->language} = {
-			'value' => $description->value,
-			'language' => $description->language,
-		};
-	}
+sub descriptions {
+	my $self = shift;
 
-	# Labels.
-	foreach my $label (@{$self->{'labels'}}) {
-		$struct_hr->{'labels'}->{$label->language} = {
-			'value' => $label->value,
-			'language' => $label->language,
-		};
-	}
+	return @{$self->{'descriptions'}};
+}
 
-	# Claims.
-	foreach my $claim (@{$self->{'claims'}}) {
-		if (! exists $struct_hr->{'claims'}->{$claim->snak->property}) {
-			$struct_hr->{'claims'}->{$claim->snak->property} = [];
-		}
-		push @{$struct_hr->{'claims'}->{$claim->snak->property}},
-			Wikidata::Datatype::Struct::Statement::obj2struct($claim);
-	}
+sub entity {
+	my $self = shift;
 
-	# Sitelinks.
-	foreach my $sitelink (@{$self->{'sitelinks'}}) {
-		$struct_hr->{'sitelinks'}->{$sitelink->site} =
-			Wikidata::Datatype::Struct::Sitelink::obj2struct($sitelink);
-	}
+	return $self->{'entity'};
+}
 
-	return $struct_hr;
+sub labels {
+	my $self = shift;
+
+	return @{$self->{'labels'}};
+}
+
+sub sitelinks {
+	my $self = shift;
+
+	return @{$self->{'sitelinks'}};
 }
 
 sub _add_claim {
